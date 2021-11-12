@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  app:
+    container_name: rankmycache-test
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
+    depends_on:
+      - db
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/home/app
+      - ./package.json:/home/app/package.json:cached
+    networks: 
+      - rankmycache-test-network
+
+  redis:
+    container_name: rankmycache-test-redis
+    image: redis 
+    ports:
+      - 6379:6379
+    command: redis-server --requirepass secret
+    networks:
+      - rankmycache-test-network
+
+  db:
+    image: mysql:5.7
+    container_name: rankmycache-test-db
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: example-name
+    networks:
+      - rankmycache-test-network
+
+networks:
+  rankmycache-test-network:
+    external:
+      name: default_services_network
